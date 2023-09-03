@@ -1,3 +1,5 @@
+import React from "react";
+
 class Authenticator {
   saveAuth(userType, token) {
     localStorage.setItem("userType", userType);
@@ -30,6 +32,7 @@ class Authenticator {
   }
 }
 
-const Auth = new Authenticator();
+export const Auth = new Authenticator();
 
-export default Auth;
+const AuthContext = React.createContext(Auth);
+export default AuthContext;

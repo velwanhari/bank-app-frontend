@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useContext, useState } from "react";
 import Container from "@mui/material/Container";
 import Typography from "@mui/material/Typography";
 import Box from "@mui/material/Box";
@@ -8,11 +8,12 @@ import FormControl from "@mui/material/FormControl";
 import Paper from "@mui/material/Paper";
 import Stack from "@mui/material/Stack";
 import axios from "axios";
-import Auth from "./helpers/Auth";
+import AuthContext from "./helpers/Auth";
 import { Alert, Snackbar } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 
 function Reagistration() {
+  const Auth = useContext(AuthContext);
   const navigate = useNavigate();
   const [form, setForm] = useState({
     name: "",

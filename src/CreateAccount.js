@@ -9,13 +9,62 @@ import Stack from "@mui/material/Stack";
 import Select from "@mui/material/Select";
 import MenuItem from "@mui/material/MenuItem";
 import InputLabel from "@mui/material/InputLabel";
+import axios from "axios";
+import AuthContext from "./helpers/Auth";
+import { useNavigate } from "react-router-dom";
+import { Alert, Snackbar } from "@mui/material";
 
 export default function CreateAccount() {
+  const navigate = useNavigate();
   const [account, setAccount] = React.useState("");
+  const [errorTost, setErrorTost] = React.useState("");
+  const [fieldError, setFieldError] = React.useState({ accountType: "" });
+  const Auth = React.useContext(AuthContext);
+  const token = Auth.checkIsLogin();
 
   const handleChange = (event) => {
     setAccount(event.target.value);
+    setFieldError({accountType : ""});
   };
+
+  const submitCreateAccount = async () => {
+    console.log(account);
+    try {
+      const respose = await axios.post(
+        "http://localhost:8888/api/v1/account/create",
+        {
+          accountType: account,
+        },
+        {
+          headers: {
+            Authorization: token,
+          },
+        }
+      );
+
+      if (respose.status === 200) {
+        navigate("/accounts");
+      }
+    } catch (error) {
+      const {
+        response: { data },
+        message,
+      } = error;
+      if (typeof data == "string") {
+        setErrorTost(data);
+      } else {
+        setErrorTost(message);
+        const { errors } = data;
+        const newErrorFiled = {};
+        errors.forEach((errfield) => {
+          const { msg, path } = errfield;
+          newErrorFiled[path] = msg;
+          setFieldError({ ...fieldError, ...newErrorFiled });
+        });
+      }
+    }
+  };
+
   return (
     <Container sx={{ marginTop: 10 }}>
       <Typography variant="h3" component="h2" marginBottom={5}>
@@ -30,7 +79,7 @@ export default function CreateAccount() {
         }}
       >
         <Paper
-        elevation={6}
+          elevation={6}
           sx={{
             display: "flex",
             flexDirection: "column",
@@ -51,16 +100,55 @@ export default function CreateAccount() {
                 value={account}
                 label="Select Account Type"
                 onChange={handleChange}
+                error={fieldError.accountType.length !== 0}
               >
-                <MenuItem value={10}>Saving</MenuItem>
-                <MenuItem value={20}>Current</MenuItem>
-                <MenuItem value={30}>FD</MenuItem>
+                <MenuItem value={"saving"}>Saving</MenuItem>
+                <MenuItem value={"current"}>Current</MenuItem>
+                <MenuItem value={"fd"}>FD</MenuItem>
               </Select>
+              {fieldError.accountType && (
+                <p className="MuiFormHelperText-root Mui-error MuiFormHelperText-sizeMedium css-1d1r5q-MuiFormHelperText-root">
+                  {fieldError.accountType}
+                </p>
+              )}
             </FormControl>
-            <Button variant="contained">Create</Button>
+            <Button onClick={submitCreateAccount} variant="contained">
+              Create
+            </Button>
           </Stack>
         </Paper>
       </Box>
+      <Snackbar
+        open={errorTost.length > 0}
+        autoHideDuration={6000}
+        onClose={() => setErrorTost("")}
+      >
+        <Alert
+          onClose={() => setErrorTost("")}
+          severity="error"
+          sx={{ width: "100%" }}
+        >
+          {errorTost}
+        </Alert>
+      </Snackbar>
     </Container>
   );
 }
+
+// const getAsync = function () {
+//   return new Promise((res,rej)=>{
+//     try {
+//       setTimeout(() => {
+//         res("sucess");
+//       },3000);
+//     } catch (error) {
+//       rej(error)
+//     }
+//   })
+// };
+
+// getAsync().then(x => {
+//   console.log(x) // "success"
+// }).catch(er => {
+
+// })
