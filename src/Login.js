@@ -183,7 +183,8 @@ function Login() {
                 type="email"
                 value={form.email}
                 onChange={(e) => {
-                  setForm((s) => ({ ...s, email: e.target.value }));
+                  const v=e.target.value
+                  setForm((s) => ({ ...s, email:v }));
                   setFieldError((er) => ({ ...er, email: "" }));
                 }}
                 error={fieldError.email.length !== 0}
@@ -198,7 +199,8 @@ function Login() {
                 type="password"
                 value={form.password}
                 onChange={(e) => {
-                  setForm((s) => ({ ...s, password: e.target.value }));
+                  const v=e.target.value
+                  setForm((s) => ({ ...s, password:v }));
                   setFieldError((er) => ({ ...er, password: "" }));
                 }}
                 error={fieldError.password.length !== 0}

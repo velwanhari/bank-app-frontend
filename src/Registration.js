@@ -45,7 +45,7 @@ function Reagistration() {
       if (respose.status === 200) {
         const token = respose.data.token;
         Auth.saveAuth("customer", token);
-        navigate("/AccountList")
+        navigate("/CreateAccount")
       }
     } catch (error) {
       const {
@@ -65,7 +65,7 @@ function Reagistration() {
     }
   };
   return (
-    <Container sx={{ marginTop: 10, height: "150vh" }}>
+    <Container sx={{ marginTop: 10, height: "200vh" }}>
       <Typography variant="h3" component="h2" marginBottom={5}>
         Registration Page
       </Typography>
@@ -85,7 +85,7 @@ function Reagistration() {
             flexDirection: "column",
             alignItems: "center",
             width: "100%",
-            height: 700,
+            height: 900,
           }}
         >
           <Stack spacing={3} sx={{ marginY: 4 }} width={400}>

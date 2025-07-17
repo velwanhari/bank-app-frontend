@@ -15,19 +15,24 @@ import axios from "axios";
 import { Snackbar } from "@mui/material";
 import { Alert } from "@mui/material";
 import AuthContext from "./helpers/Auth";
+import { useParams } from "react-router-dom";
+import TextField from "@mui/material/TextField";
 
 function TraAmount() {
   const [accounts, setAccounts] = useState([]);
+  const { customerId } = useParams();
   const Auth = useContext(AuthContext);
-
+  const [customer, setCustomer] = useState({});
   const [form, setForm] = useState({
     fromAcc: "",
     toAcc: "",
+    amount: "",
   });
 
   const [fieldError, setFieldError] = useState({
     fromAcc: "",
     toAcc: "",
+    amount: "",
   });
 
   const [errorTost, setErrorTost] = useState("");
@@ -35,9 +40,19 @@ function TraAmount() {
 
   const Transfer = async () => {
     try {
+      // const payload = {
+      //   fromAcc: form.fromAcc,
+      //   toAcc: form.toAcc,
+      //   amount: form.amount,
+      // };
       const respose = await axios.post(
         "http://localhost:8888/api/v1/customer/transaction",
-        form
+        form,
+        {
+          headers: {
+            Authorization: token,
+          },
+        }
       );
       if (respose.status === 200) {
         const token = respose.data.token;
@@ -48,21 +63,24 @@ function TraAmount() {
         response: { data },
         message,
       } = error;
-      setErrorTost(message);
-
-      const { errors } = data;
-      const newErrorFiled = {};
-      errors.forEach((errfield) => {
-        const { msg, path } = errfield;
-        newErrorFiled[path] = msg;
-        setFieldError({ ...fieldError, ...newErrorFiled });
-      });
+      if (typeof data == "string") {
+        setErrorTost(data);
+      } else {
+        setErrorTost(message);
+        const { errors } = data;
+        const newErrorFiled = {};
+        errors.forEach((errfield) => {
+          const { msg, path } = errfield;
+          newErrorFiled[path] = msg;
+          setFieldError({ ...fieldError, ...newErrorFiled });
+        });
+      }
     }
   };
 
   React.useEffect(() => {
     (async () => {
-      const accounts = await axios.get(
+      const resp = await axios.get(
         "http://localhost:8888/api/v1/customer/accountLIst",
         {
           headers: {
@@ -70,8 +88,10 @@ function TraAmount() {
           },
         }
       );
-
-      console.log(accounts);
+      if (resp.status === 200) {
+        const { accounts } = resp.data;
+        setAccounts(accounts);
+      }
     })();
   }, []);
 
@@ -110,7 +130,8 @@ function TraAmount() {
                   value={form.fromAcc}
                   label="From Account"
                   onChange={(e) => {
-                    setForm((s) => ({ ...s, fromAcc: e.target.value }));
+                    const v = e.target.value;
+                    setForm((s) => ({ ...s, fromAcc: v }));
                     setFieldError((er) => ({ ...er, fromAcc: "" }));
                   }}
                   error={fieldError.fromAcc.length !== 0}
@@ -118,13 +139,15 @@ function TraAmount() {
                   <MenuItem value="">
                     <em>None</em>
                   </MenuItem>
-                  <MenuItem value={15930}>15930</MenuItem>
-                  <MenuItem value={15930}>15930</MenuItem>
-                  <MenuItem value={15930}>15930</MenuItem>
+                  {accounts.map((ac) => (
+                    <MenuItem key={ac._id} value={ac.accountNumber}>
+                      {ac.accountNumber} {ac.accountType}
+                    </MenuItem>
+                  ))}
                 </Select>
-                {fieldError.type && (
+                {fieldError.fromAcc && (
                   <p className="MuiFormHelperText-root Mui-error MuiFormHelperText-sizeMedium css-1d1r5q-MuiFormHelperText-root">
-                    {fieldError.type}
+                    {fieldError.fromAcc}
                   </p>
                 )}
                 <FormHelperText>from Account</FormHelperText>
@@ -139,7 +162,8 @@ function TraAmount() {
                   value={form.toAcc}
                   label="To Account"
                   onChange={(e) => {
-                    setForm((s) => ({ ...s, toAcc: e.target.value }));
+                    const v = e.target.value;
+                    setForm((s) => ({ ...s, toAcc: v }));
                     setFieldError((er) => ({ ...er, toAcc: "" }));
                   }}
                   error={fieldError.toAcc.length !== 0}
@@ -147,16 +171,31 @@ function TraAmount() {
                   <MenuItem value="">
                     <em>None</em>
                   </MenuItem>
-                  <MenuItem value={35902}>35902</MenuItem>
-                  <MenuItem value={35902}>35902</MenuItem>
-                  <MenuItem value={35902}>35902</MenuItem>
+                  {accounts.map((ac) => (
+                    <MenuItem key={ac._id} value={ac.accountNumber}>
+                      {ac.accountNumber} {ac.accountType}
+                    </MenuItem>
+                  ))}
                 </Select>
-                {fieldError.type && (
+                {fieldError.toAcc && (
                   <p className="MuiFormHelperText-root Mui-error MuiFormHelperText-sizeMedium css-1d1r5q-MuiFormHelperText-root">
-                    {fieldError.type}
+                    {fieldError.toAcc}
                   </p>
                 )}
                 <FormHelperText>To Account</FormHelperText>
+                
+                <TextField
+                  label="Enter Amount You want To Transfer"
+                  variant="standard"
+                  type="number"
+                  value={form.amount}
+                  onChange={(e) => {
+                    setForm((s) => ({ ...s, amount: e.target.value }));
+                    setFieldError((er) => ({ ...er, amount: "" }));
+                  }}
+                  error={fieldError.amount.length !== 0}
+                  helperText={fieldError.amount}
+                />
               </FormControl>
               <Button onClick={Transfer} variant="contained">
                 Transaction

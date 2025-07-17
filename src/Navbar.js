@@ -89,7 +89,7 @@ function Navbar(props) {
             sx={{ flexGrow: 1, display: { xs: "none", sm: "block" } }}
             style={{ cursor: "pointer" }}
           >
-            MUI
+            NATIONAL BANK
           </Typography>
           <Box sx={{ display: { xs: "none", sm: "block" } }}>
             {navlist.map((item) => (
